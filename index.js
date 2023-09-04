@@ -102,9 +102,26 @@ async function run() {
       item.save();
       res.redirect("/");
     } else {
-      const foundList= await List.findOne({ name: listName })
+      const foundList = await List.findOne({ name: listName });
       foundList.items.push(item);
       await foundList.save();
+      res.redirect("/" + listName);
+    }
+  });
+
+  app.post("/delete", async function (req, res) {
+    const checkedItemId = req.body.checkbox;
+    const listName = req.body.listName;
+
+    if (listName === "Today") {
+      await Item.findByIdAndRemove(checkedItemId);
+      console.log("Successfully deleted checked item.");
+      res.redirect("/");
+    } else {
+      await List.findOneAndUpdate(
+        { name: listName },
+        { $pull: { items: { _id: checkedItemId } } }
+      );
       res.redirect("/" + listName);
     }
   });
