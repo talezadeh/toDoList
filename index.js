@@ -1,12 +1,17 @@
 import bodyParser from "body-parser";
 import express from "express";
 import mongoose from "mongoose";
-import * as date from "./date.mjs"
+import * as date from "./date.mjs";
+import lodash from "lodash";
 
 const app = express();
 const port = 3000;
+const _ = lodash;
 
-  // mongodb+srv://admin-mori:Test123@cluster0.w0sfg3n.mongodb.net/todolistDB
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static("public"));
+
+// mongodb+srv://admin-mori:Test123@cluster0.w0sfg3n.mongodb.net/todolistDB
 async function run() {
   await mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
 
@@ -16,77 +21,61 @@ async function run() {
 
   const Item = mongoose.model("item", itemSchema);
 
-  const buy = new Item({
-    name: "Buy Food.",
+  const item1 = new Item({
+    name: "Welcome to your todolist!",
   });
 
-  const cook = new Item({
-    name: "Cook Food.",
+  const item2 = new Item({
+    name: "Hit the + button to add a new item.",
   });
 
-  const eat = new Item({
-    name: "Eat Food.",
+  const item3 = new Item({
+    name: "<-- Hit this to delete an item.",
   });
 
+  const defaultItems = [item1, item2, item3];
 
-  // try {
-  //   await Item.insertMany([buy, cook, eat]);
-  //   console.log("Items inserted successfully!");
-  // } catch (err) {
-  //   console.log(err);
-  // }
+  const listSchema = {
+    name: String,
+    items: [itemSchema],
+  };
 
-const toDoItems = ["Buy Food", "Cook Food", "Eat Food"];
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public"));
+  const List = mongoose.model("List", listSchema);
 
-var itemsNames = [];
-async function myFindFunction(itemsNames) {
-  try {
-    var items = await Item.find();
+  app.get("/", async (req, res) => {
+    var foundItems = await Item.find();
+    var today = date.getDate();
 
-    items.forEach((item) => {
-      // mongoose.connection.close();
-      itemsNames.push(item.name);
-      // console.log(item.name);
-    });
+    if (foundItems.length === 0) {
+      try {
+        Item.insertMany(defaultItems);
+        console.log("Successfully savevd default items to DB.");
+      } catch (err) {
+        console.log(err);
+      }
+      res.redirect("/");
+    }else{
+      res.render("list.ejs",{listTitle:"Today", newListItems: foundItems, toDoDate: today});
+    }
+  });
 
-    return itemsNames;
-  } catch (err) {
-    console.log(err);
-  }
-}
+  app.post("/", (req, res) => {
+    const newToDo = req.body.newItem;
+    toDoItems.push(newToDo);
+    res.redirect("/");
+  });
 
-app.get("/", async (req, res) => {
-  var items = await myFindFunction(itemsNames);
-  // console.log(items);
-  var today= date.getDate();
-  res.render("list.ejs", {listTitle:"Personal", toDoDate:today , items });
-});
-
-app.post("/", (req, res) => {
-  const newToDo = req.body.newItem;
-  toDoItems.push(newToDo);
-  res.redirect("/");
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
 }
 
 run();
 
-
-
-// (async () => {
-//   try {
-//     await Item.insertMany([buy, cook, eat]);
-//     console.log("Items inserted successfully!");
-//   } catch (err) {
-//     console.log(err);
-//   }
-// })();
-
+// try {
+//   await Item.insertMany([buy, cook, eat]);
+//   console.log("Items inserted successfully!");
+// } catch (err) {
+//   console.log(err);
+// }
