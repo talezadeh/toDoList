@@ -1,0 +1,29 @@
+<%- include ("header") %>
+
+<div class="box" id="heading">
+  <h3><%= toDoDate %></h3>
+</div>
+
+<div class="box-heading">
+  <h1><%= listTitle %></h1>
+</div>
+
+<div class="box-form">
+
+    <div class="item">
+        <input type="checkbox" name="checkbox" value="" onChange="this.form.submit()"></input>
+        <p>Something</p>
+      </div>
+
+  <form class="item" action="/" method="post">
+    <input
+      type="text"
+      name="newItem"
+      placeholder="New Item"
+      autocomplete="off"
+    />
+    <button type="submit" name="list" value="<%= listTitle %>">+</button>
+  </form>
+</div>
+
+<%- include ("footer") %>
