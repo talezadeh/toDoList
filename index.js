@@ -11,9 +11,9 @@ const _ = lodash;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// mongodb+srv://admin-mori:Test123@cluster0.w0sfg3n.mongodb.net/todolistDB
+//mongodb://127.0.0.1:27017/todolistDB
 async function run() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
+  await mongoose.connect("mongodb+srv://admin-mori:Test123@cluster0.w0sfg3n.mongodb.net/todolistDB");
 
   const itemSchema = {
     name: String,
@@ -133,9 +133,3 @@ async function run() {
 
 run();
 
-// try {
-//   await Item.insertMany([buy, cook, eat]);
-//   console.log("Items inserted successfully!");
-// } catch (err) {
-//   console.log(err);
-// }
