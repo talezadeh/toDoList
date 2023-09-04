@@ -40,12 +40,12 @@ async function run() {
     items: [itemSchema],
   };
 
-
   const List = mongoose.model("List", listSchema);
+
+  var today = date.getDate();
 
   app.get("/", async (req, res) => {
     var foundItems = await Item.find();
-    var today = date.getDate();
 
     if (foundItems.length === 0) {
       try {
@@ -55,15 +55,58 @@ async function run() {
         console.log(err);
       }
       res.redirect("/");
-    }else{
-      res.render("list.ejs",{listTitle:"Today", newListItems: foundItems, toDoDate: today});
+    } else {
+      res.render("list.ejs", {
+        listTitle: "Today",
+        newListItems: foundItems,
+        toDoDate: today,
+      });
     }
   });
 
-  app.post("/", (req, res) => {
-    const newToDo = req.body.newItem;
-    toDoItems.push(newToDo);
-    res.redirect("/");
+  app.get("/:customListName", async function (req, res) {
+    const customListName = _.capitalize(req.params.customListName);
+    try {
+      var foundList = await List.findOne({ name: customListName });
+
+      if (!foundList) {
+        // Create a new List
+        const list = new List({
+          name: customListName,
+          items: defaultItems,
+        });
+        list.save();
+        res.redirect("/" + customListName);
+      } else {
+        //Show an existing List
+        res.render("list.ejs", {
+          listTitle: foundList.name,
+          newListItems: foundList.items,
+          toDoDate: today,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  app.post("/", async (req, res) => {
+    const itemName = req.body.newItem;
+    const listName = req.body.list;
+
+    const item = new Item({
+      name: itemName,
+    });
+
+    if (listName === "Today") {
+      item.save();
+      res.redirect("/");
+    } else {
+      const foundList= await List.findOne({ name: listName })
+      foundList.items.push(item);
+      await foundList.save();
+      res.redirect("/" + listName);
+    }
   });
 
   app.listen(port, () => {
