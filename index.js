@@ -126,8 +126,13 @@ async function run() {
     }
   });
 
+  let port = process.env.PORT;
+  if (port==null || port==""){
+    port= 3000;
+  }
+
   app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server has started successfully.`);
   });
 }
 
