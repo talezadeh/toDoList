@@ -13,7 +13,7 @@ app.use(express.static("public"));
 
 //mongodb://127.0.0.1:27017/todolistDB
 async function run() {
-  await mongoose.connect("mongodb+srv://admin-mori:Test123@cluster0.w0sfg3n.mongodb.net/todolistDB");
+  await mongoose.connect("{Your server}");
 
   const itemSchema = {
     name: String,
